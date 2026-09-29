@@ -129,3 +129,34 @@ python3 tests/test_e2e.py
 [x] Phase 1: MVP Core (Pageviews REST API, PDF generation, basic regression)
 [x] Phase 2: Advanced Analytics (STL Seasonality, IQR Outliers, $R^2$, Disk Caching)
 [x] Phase 3: Market Intelligence (Baseline Growth Alignment, Wikidata SPARQL Clusters, Extended PDF Report)
+
+📈 Scalability & Architectural Evolution
+To evolve from a single CLI Agent Skill into an enterprise-grade analytics engine, the project follows a 4-dimensional scaling strategy:
+
+                  ┌─────────────────────────────────────────┐
+                  │ 1. Input & Ingestion Expansion          │
+                  │ (Batch, MediaWiki Streams, Multi-Modal) │
+                  └────────────────────┬────────────────────┘
+                                       │
+┌──────────────────────────────────────┼──────────────────────────────────────┐
+│                                      ▼                                      │
+│ 2. High-Throughput & Infrastructure  │  3. LLM & Agent Workflows            │
+│ (Virtual Threads, Distributed Redis) │  (Streaming, Structured Outputs, RAG) │
+└──────────────────────────────────────┼──────────────────────────────────────┘
+
+1. Input & Data Ingestion Scaling (New Interfaces)
+Multi-Modal & Structured Inputs: Extend CLI to accept unstructured inputs (e.g., raw text documents, PDF briefs, or image URLs). The Java backend automatically extracts entity names and maps them via Wikidata SPARQL.
+
+Batch Process Pipelines: Support mass-analysis via CSV/JSON config files (e.g., --file batch_queries.json with 1,000+ articles) or direct API Webhooks.
+
+Real-time Stream Ingestion: Shift from static monthly Pageviews REST API to MediaWiki EventStreams (SSE) for continuous, real-time anomaly detection and instant alert triggers.
+
+2. High-Throughput & Infrastructure
+Distributed Parallel Processing: Refactor the WikiApp execution loop using Java 21 Virtual Threads (Project Loom) to fetch, decompose, and render hundreds of articles concurrently with near-zero thread overhead and no I/O blocking.
+
+Redis / Valkey Shared Cache Layer: Replace the local .cache/wiki/ disk storage with a distributed Redis / Valkey cluster. Enables shared sub-millisecond caching across multiple load-balanced Docker container instances.
+
+Stateless Microservice Deployment: Package the Java runtime into a lightweight GraalVM Native Image or Spring Boot WebFlux microservice for serverless auto-scaling (AWS Lambda / Google Cloud Run) with <50ms startup times.
+
+3. Evolved LLM & Agent Interaction Patterns
+Native Structured Outputs: Enforce strict JSON Schemas (via OpenAI Structured Outputs / Instructor / Pydantic) to guarantee 100% type-safe tool invocations between LLM agents and the Java CLI
