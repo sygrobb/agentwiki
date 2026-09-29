@@ -25,9 +25,9 @@ wiki_tool = types.FunctionDeclaration(
 tools = types.Tool(function_declarations=[wiki_tool])
 
 # 3. Відправка запиту до Gemini
-print("🚀 Відправляємо запит до Gemini 2.5 Flash...")
+print("🚀 Відправляємо запит до Gemini 3.5 Flash...")
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash-lite",
     contents="Проаналізуй тренд статті uk:Астрономія за останні 12 місяців і збережи PDF у report.pdf",
     config=types.GenerateContentConfig(tools=[tools])
 )
@@ -40,7 +40,9 @@ if response.candidates[0].content.parts[0].function_call:
 
     # Запускаємо наш Java CLI через run.sh / docker
     cmd = [
-        "./run.sh",
+        "docker", "run", "--rm",
+        "-v", f"{os.getcwd()}:/skill/reports",
+        "wikipedia-analytics-skill:latest",
         "--articles", str(call.args.get("articles")),
         "--period-months", str(int(call.args.get("period_months", 24))),
         "--json"
@@ -49,7 +51,7 @@ if response.candidates[0].content.parts[0].function_call:
         cmd.extend(["--output-pdf", str(call.args["output_pdf"])])
 
     print("⚙️ Виконуємо Java CLI...")
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
     print("📊 Результат виконання (JSON):")
     print(result.stdout)
 else:
